@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f4f7fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="九九ドリル">
+<meta name="format-detection" content="telephone=no">
+<title>九九ドリル</title>
+<style>
+* { box-sizing: border-box; }
+html {
+    min-height: 100%;
+    background: #f4f7fb;
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    background: #f4f7fb;
+    color: #333;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+button, select, input { font: inherit; }
+button, select {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+button {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+}
+.container {
+    width: min(100%, 620px);
+    margin: 0 auto;
+    padding: clamp(8px, 2dvh, 20px) clamp(10px, 4vw, 20px) clamp(12px, 2.5dvh, 28px);
+    text-align: center;
+}
+h1 {
+    margin: clamp(2px, 1dvh, 10px) 0 clamp(8px, 2dvh, 18px);
+    font-size: clamp(24px, 4dvh, 34px);
+}
+.card {
+    background: #fff;
+    border-radius: clamp(15px, 3vw, 22px);
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+.settings {
+    padding: clamp(14px, 3dvh, 25px) clamp(12px, 4vw, 20px);
+}
+.settings h2 {
+    margin: 0 0 clamp(10px, 2dvh, 18px);
+    font-size: clamp(20px, 3.3dvh, 24px);
+}
+.mode-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(8px, 1.5dvh, 12px);
+}
+.mode-button {
+    min-height: clamp(82px, 12dvh, 104px);
+    padding: 10px 8px;
+    border: none;
+    border-radius: clamp(13px, 2.5vw, 18px);
+    background: #f0f3f8;
+    color: #333;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    font-size: clamp(17px, 2.8dvh, 21px);
+    font-weight: 800;
+    line-height: 1.3;
+}
+.mode-button .mode-number {
+    display: block;
+    margin-bottom: 2px;
+    font-size: .82em;
+    font-weight: 700;
+    opacity: .75;
+}
+.mode-button .example {
+    display: block;
+    margin-top: 4px;
+    font-size: clamp(12px, 2dvh, 14px);
+    font-weight: 500;
+    opacity: .75;
+}
+.mode-button.selected {
+    background: #4f7cff;
+    color: #fff;
+}
+.mode-description {
+    min-height: 2.8em;
+    margin: clamp(8px, 1.5dvh, 12px) 0 0;
+    color: #667085;
+    font-size: clamp(13px, 2.2dvh, 15px);
+    line-height: 1.4;
+}
+.dan-setting {
+    margin-top: clamp(10px, 2dvh, 18px);
+    padding: clamp(10px, 2dvh, 15px);
+    border-radius: 14px;
+    background: #f5f7fb;
+}
+.dan-setting-title {
+    margin-bottom: 8px;
+    font-size: clamp(16px, 2.7dvh, 19px);
+    font-weight: 800;
+}
+.dan-buttons {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 5px;
+}
+.dan-button {
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background: #fff;
+    color: #333;
+    box-shadow: 0 1px 4px rgba(0,0,0,.10);
+    font-size: clamp(15px, 3vw, 19px);
+    font-weight: 800;
+}
+.dan-button.selected {
+    background: #4f7cff;
+    color: #fff;
+}
+.setting-row {
+    margin-top: clamp(12px, 2.4dvh, 20px);
+    font-size: clamp(16px, 2.7dvh, 19px);
+}
+select {
+    margin-left: 8px;
+    padding: clamp(7px, 1.4dvh, 10px) clamp(10px, 2.5vw, 15px);
+    border: 1px solid #c8ceda;
+    border-radius: 10px;
+    background: #fff;
+    font-size: clamp(16px, 2.8dvh, 19px);
+}
+.option-setting {
+    margin-top: clamp(10px, 2dvh, 16px);
+    color: #555;
+    font-size: clamp(14px, 2.4dvh, 17px);
+}
+.option-setting label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.option-setting input {
+    width: 1.2em;
+    height: 1.2em;
+    margin: 0;
+    accent-color: #4f7cff;
+}
+.start-button {
+    margin-top: clamp(13px, 2.5dvh, 22px);
+    padding: clamp(11px, 2dvh, 14px) clamp(26px, 8vw, 40px);
+    border: none;
+    border-radius: 15px;
+    background: #4f7cff;
+    color: #fff;
+    font-size: clamp(20px, 3.2dvh, 23px);
+    font-weight: 800;
+}
+.hidden { display: none !important; }
+
+/* 問題画面 */
+.question-area {
+    padding: clamp(10px, 2.2dvh, 24px) clamp(10px, 3vw, 16px);
+    margin-bottom: clamp(7px, 1.4dvh, 14px);
+}
+.progress {
+    color: #777;
+    font-size: clamp(14px, 2.4dvh, 18px);
+}
+.mode-label {
+    margin-top: 3px;
+    color: #4f7cff;
+    font-size: clamp(13px, 2.2dvh, 16px);
+    font-weight: 800;
+}
+.question {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .20em;
+    min-height: 1.4em;
+    margin: clamp(10px, 2.2dvh, 22px) 0 clamp(8px, 1.5dvh, 14px);
+    font-size: clamp(36px, 7.2dvh, 54px);
+    font-weight: 800;
+    line-height: 1.05;
+    white-space: nowrap;
+}
+.answer-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25em;
+    height: 1.05em;
+    padding: 0 .08em;
+    border: .055em solid #555;
+    border-radius: .10em;
+    line-height: 1;
+}
+.answer-slot.wide { min-width: 1.55em; }
+.message {
+    min-height: clamp(30px, 5.5dvh, 45px);
+    margin-top: clamp(4px, 1dvh, 10px);
+    font-size: clamp(17px, 3.1dvh, 22px);
+    font-weight: 800;
+}
+.correct { color: #28a45a; }
+.wrong { color: #e05252; }
+.keypad {
+    width: min(100%, 420px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(6px, 1.2dvh, 11px);
+}
+.number-button {
+    height: clamp(43px, 7.4dvh, 68px);
+    border: none;
+    border-radius: clamp(10px, 2vw, 15px);
+    background: #fff;
+    color: #333;
+    box-shadow: 0 3px 8px rgba(0,0,0,.12);
+    font-size: clamp(23px, 4.2dvh, 30px);
+    font-weight: 800;
+}
+.number-button:active,
+.start-button:active,
+.mode-button:active,
+.dan-button:active,
+.back-button:active,
+.action-button:active {
+    transform: scale(.97);
+}
+.delete-button { background: #ddd; }
+.zero-button { grid-column: span 2; }
+.action-row {
+    width: min(100%, 420px);
+    margin: clamp(6px, 1.2dvh, 10px) auto 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(6px, 1.2dvh, 10px);
+}
+.action-row.show-next { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.action-button {
+    width: 100%;
+    min-width: 0;
+    height: clamp(45px, 7.6dvh, 58px);
+    padding: 0 clamp(8px, 2vw, 16px);
+    border: none;
+    border-radius: clamp(10px, 2vw, 15px);
+    color: #fff;
+    font-size: clamp(17px, 3dvh, 21px);
+    font-weight: 800;
+}
+.answer-button { background: #4f7cff; }
+.next-button { background: #55b878; }
+.back-button {
+    margin-top: clamp(7px, 1.4dvh, 14px);
+    padding: clamp(8px, 1.5dvh, 11px) clamp(16px, 4vw, 22px);
+    border: 1px solid #c7ceda;
+    border-radius: 13px;
+    background: #f6f8fb;
+    color: #596273;
+    font-size: clamp(14px, 2.5dvh, 17px);
+    font-weight: 800;
+}
+
+/* 結果画面 */
+.result {
+    padding: clamp(20px, 5dvh, 35px) clamp(12px, 4vw, 20px);
+}
+.result h2 {
+    margin: 0;
+    font-size: clamp(23px, 4dvh, 30px);
+}
+.result-score {
+    margin: clamp(12px, 3dvh, 20px);
+    font-size: clamp(30px, 6dvh, 40px);
+    font-weight: 900;
+}
+.result-stats {
+    width: min(100%, 430px);
+    margin: 0 auto clamp(12px, 2.5dvh, 20px);
+    padding: clamp(12px, 2.5dvh, 18px);
+    border-radius: 14px;
+    background: #f5f7fb;
+    line-height: 1.65;
+}
+.result-date { color: #555; font-size: clamp(15px, 2.5dvh, 18px); }
+.result-time { font-size: clamp(17px, 3dvh, 21px); font-weight: 800; }
+.result-average { font-size: clamp(16px, 2.8dvh, 20px); }
+.result-message {
+    font-size: clamp(17px, 3dvh, 21px);
+    font-weight: 700;
+    line-height: 1.5;
+}
+.perfect-celebration {
+    width: min(100%, 470px);
+    margin: 0 auto clamp(12px, 2.5dvh, 20px);
+    padding: clamp(14px, 3dvh, 22px);
+    border: 3px solid #f2b705;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fff8cf, #ffe4f2, #e7f0ff);
+    font-size: clamp(22px, 4.2dvh, 30px);
+    font-weight: 900;
+    line-height: 1.45;
+    white-space: pre-line;
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    animation: celebrate-pop .55s ease-out both;
+}
+.result.perfect {
+    border: 4px solid #f2b705;
+    background: linear-gradient(180deg, #fffdf2 0%, #fff 45%);
+}
+@keyframes celebrate-pop {
+    0% { transform: scale(.82); opacity: 0; }
+    65% { transform: scale(1.06); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 430px) {
+    .mode-button { padding-left: 6px; padding-right: 6px; }
+    .dan-buttons { gap: 4px; }
+    .dan-button { border-radius: 8px; }
+}
+@media (max-height: 720px) {
+    .container { padding-top: 5px; padding-bottom: 8px; }
+    h1 { margin-bottom: 7px; }
+    .question-area { padding-top: 8px; padding-bottom: 8px; margin-bottom: 6px; }
+    .question { margin-top: 7px; margin-bottom: 5px; }
+    .message { margin-top: 3px; }
+    .action-row { margin-top: 5px; }
+    .back-button { margin-top: 6px; }
+}
+@media (max-height: 610px) {
+    h1 { font-size: 20px; }
+    .question { font-size: 32px; }
+    .number-button { height: 38px; font-size: 21px; }
+    .action-button { height: 40px; font-size: 16px; }
+    .back-button { padding-top: 6px; padding-bottom: 6px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>✖️ 九九ドリル</h1>
+
+    <section id="settings" class="settings card">
+        <h2>どんな練習をする？</h2>
+        <div class="mode-buttons">
+            <button type="button" class="mode-button selected" id="modeBasic" onclick="selectMode('basic')">
+                <span class="mode-number">①</span>段ごとの基本九九
+                <span class="example">3×1，3×2，3×3…</span>
+            </button>
+            <button type="button" class="mode-button" id="modeRandom" onclick="selectMode('random')">
+                <span class="mode-number">②</span>全段ランダム
+                <span class="example">1〜9の段をランダム</span>
+            </button>
+            <button type="button" class="mode-button" id="modeHole" onclick="selectMode('hole')">
+                <span class="mode-number">③</span>穴あき九九
+                <span class="example">3×□＝12／□×4＝12</span>
+            </button>
+            <button type="button" class="mode-button" id="modeMix" onclick="selectMode('mix')">
+                <span class="mode-number">④</span>ミックス
+                <span class="example">基本＋穴あきをランダム</span>
+            </button>
+        </div>
+
+        <div id="modeDescription" class="mode-description">選んだ段を1から9まで順番に練習します。</div>
+
+        <div id="danSetting" class="dan-setting">
+            <div class="dan-setting-title">どの段をやる？</div>
+            <div class="dan-buttons" id="danButtons">
+                <button type="button" class="dan-button" data-dan="1" onclick="selectDan(1)">1</button>
+                <button type="button" class="dan-button selected" data-dan="2" onclick="selectDan(2)">2</button>
+                <button type="button" class="dan-button" data-dan="3" onclick="selectDan(3)">3</button>
+                <button type="button" class="dan-button" data-dan="4" onclick="selectDan(4)">4</button>
+                <button type="button" class="dan-button" data-dan="5" onclick="selectDan(5)">5</button>
+                <button type="button" class="dan-button" data-dan="6" onclick="selectDan(6)">6</button>
+                <button type="button" class="dan-button" data-dan="7" onclick="selectDan(7)">7</button>
+                <button type="button" class="dan-button" data-dan="8" onclick="selectDan(8)">8</button>
+                <button type="button" class="dan-button" data-dan="9" onclick="selectDan(9)">9</button>
+            </div>
+        </div>
+
+        <div class="setting-row">
+            何問やる？
+            <select id="questionCount">
+                <option value="9" selected>9問</option>
+                <option value="10">10問</option>
+                <option value="20">20問</option>
+                <option value="30">30問</option>
+                <option value="50">50問</option>
+                <option value="81">81問</option>
+            </select>
+        </div>
+
+        <div class="option-setting">
+            <label>
+                <input type="checkbox" id="showTimeOption">
+                結果に総時間・平均時間を表示する
+            </label>
+        </div>
+
+        <button type="button" class="start-button" onclick="startGame()">スタート！</button>
+    </section>
+
+    <section id="game" class="hidden">
+        <div class="question-area card">
+            <div id="progress" class="progress">1 / 9 問</div>
+            <div id="modeLabel" class="mode-label">2の段</div>
+            <div id="question" class="question" aria-live="polite"></div>
+            <div id="message" class="message" aria-live="polite"></div>
+        </div>
+
+        <div class="keypad">
+            <button type="button" class="number-button" onclick="inputNumber(1)">1</button>
+            <button type="button" class="number-button" onclick="inputNumber(2)">2</button>
+            <button type="button" class="number-button" onclick="inputNumber(3)">3</button>
+            <button type="button" class="number-button" onclick="inputNumber(4)">4</button>
+            <button type="button" class="number-button" onclick="inputNumber(5)">5</button>
+            <button type="button" class="number-button" onclick="inputNumber(6)">6</button>
+            <button type="button" class="number-button" onclick="inputNumber(7)">7</button>
+            <button type="button" class="number-button" onclick="inputNumber(8)">8</button>
+            <button type="button" class="number-button" onclick="inputNumber(9)">9</button>
+            <button type="button" class="number-button delete-button" onclick="deleteNumber()">⌫</button>
+            <button type="button" class="number-button zero-button" onclick="inputNumber(0)">0</button>
+        </div>
+
+        <div id="actionRow" class="action-row">
+            <button type="button" id="answerButton" class="action-button answer-button" onclick="checkAnswer()">答える！</button>
+            <button type="button" id="nextButton" class="action-button next-button hidden" onclick="nextQuestion()">次の問題 →</button>
+        </div>
+
+        <button type="button" class="back-button" onclick="confirmBackToSettings()">← スタート画面に戻る</button>
+    </section>
+
+    <section id="result" class="result card hidden">
+        <h2 id="resultTitle">🎉 おつかれさま！</h2>
+        <div id="perfectCelebration" class="perfect-celebration hidden"></div>
+        <div id="resultScore" class="result-score"></div>
+        <div id="resultStats" class="result-stats"></div>
+        <div id="resultMessage" class="result-message"></div>
+        <button type="button" class="start-button" onclick="backToSettings()">もう一度やる</button>
+    </section>
+</div>
+
+<script>
+"use strict";
+
+let selectedMode = "basic";
+let selectedDan = 2;
+let totalQuestions = 9;
+let currentQuestion = 0;
+let correctCount = 0;
+let userAnswer = "";
+let answered = false;
+let questions = [];
+let current = null;
+let startTime = 0;
+let endTime = 0;
+let showTime = false;
+
+const modeDescriptions = {
+    basic: "選んだ段を1から9まで順番に練習します。",
+    random: "1〜9の段から，できるだけ同じ問題が重ならないようにランダム出題します。",
+    hole: "答えを見て，□に入る数を考えます。□の位置は左右ランダムです。",
+    mix: "ふつうの九九と穴あき九九をランダムに混ぜて出題します。"
+};
+
+const modeNames = {
+    basic: "段ごとの基本九九",
+    random: "全段ランダム",
+    hole: "穴あき九九",
+    mix: "ミックス"
+};
+
+function selectMode(mode) {
+    selectedMode = mode;
+    document.querySelectorAll(".mode-button").forEach(btn => btn.classList.remove("selected"));
+    const map = { basic: "modeBasic", random: "modeRandom", hole: "modeHole", mix: "modeMix" };
+    document.getElementById(map[mode]).classList.add("selected");
+    document.getElementById("modeDescription").textContent = modeDescriptions[mode];
+    document.getElementById("danSetting").classList.toggle("hidden", mode !== "basic");
+
+    // 基本九九に戻ったときは，1段を一巡しやすい9問を既定にする。
+    // 他モードでは現在の選択をそのまま維持する。
+}
+
+function selectDan(dan) {
+    selectedDan = dan;
+    document.querySelectorAll(".dan-button").forEach(btn => btn.classList.remove("selected"));
+    const button = document.querySelector(`.dan-button[data-dan="${dan}"]`);
+    if (button) button.classList.add("selected");
+}
+
+function shuffle(array) {
+    const a = array.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function allFacts() {
+    const facts = [];
+    for (let a = 1; a <= 9; a++) {
+        for (let b = 1; b <= 9; b++) {
+            facts.push({ a, b });
+        }
+    }
+    return facts;
+}
+
+function buildQuestions(mode, count) {
+    const result = [];
+
+    if (mode === "basic") {
+        for (let i = 0; i < count; i++) {
+            const b = (i % 9) + 1;
+            result.push({ type: "normal", a: selectedDan, b, answer: selectedDan * b });
+        }
+        return result;
+    }
+
+    // 81問までは全九九をシャッフルしたものから重複なしで取得する。
+    // 将来81問を超える設定を加えても動くよう，必要なら新しい山を継ぎ足す。
+    let pool = [];
+    while (pool.length < count) {
+        pool = pool.concat(shuffle(allFacts()));
+    }
+    const selectedFacts = pool.slice(0, count);
+
+    selectedFacts.forEach(fact => {
+        const a = fact.a;
+        const b = fact.b;
+        const product = a * b;
+
+        if (mode === "random") {
+            result.push({ type: "normal", a, b, answer: product });
+            return;
+        }
+
+        const useHole = mode === "hole" || (mode === "mix" && Math.random() < 0.5);
+        if (!useHole) {
+            result.push({ type: "normal", a, b, answer: product });
+            return;
+        }
+
+        const missingSide = Math.random() < 0.5 ? "left" : "right";
+        result.push({
+            type: "hole",
+            a,
+            b,
+            product,
+            missingSide,
+            answer: missingSide === "left" ? a : b
+        });
+    });
+
+    return result;
+}
+
+function startGame() {
+    totalQuestions = Number(document.getElementById("questionCount").value);
+    showTime = document.getElementById("showTimeOption").checked;
+    currentQuestion = 0;
+    correctCount = 0;
+    userAnswer = "";
+    answered = false;
+    questions = buildQuestions(selectedMode, totalQuestions);
+    startTime = performance.now();
+    endTime = 0;
+
+    document.getElementById("settings").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+    showQuestion();
+}
+
+function showQuestion() {
+    current = questions[currentQuestion];
+    userAnswer = "";
+    answered = false;
+
+    document.getElementById("progress").textContent = `${currentQuestion + 1} / ${totalQuestions} 問`;
+    document.getElementById("modeLabel").textContent = selectedMode === "basic"
+        ? `${selectedDan}の段`
+        : modeNames[selectedMode];
+
+    document.getElementById("message").textContent = "";
+    document.getElementById("message").className = "message";
+    document.getElementById("nextButton").classList.add("hidden");
+    document.getElementById("actionRow").classList.remove("show-next");
+    document.getElementById("answerButton").disabled = false;
+    renderQuestion();
+}
+
+function answerSlot(value, wide = false) {
+    const cls = wide ? "answer-slot wide" : "answer-slot";
+    return `<span class="${cls}">${value || "&nbsp;"}</span>`;
+}
+
+function renderQuestion() {
+    const q = current;
+    const typed = userAnswer;
+    let html = "";
+
+    if (q.type === "normal") {
+        html = `<span>${q.a}</span><span>×</span><span>${q.b}</span><span>＝</span>${answerSlot(typed, true)}`;
+    } else if (q.missingSide === "left") {
+        html = `${answerSlot(typed)}<span>×</span><span>${q.b}</span><span>＝</span><span>${q.product}</span>`;
+    } else {
+        html = `<span>${q.a}</span><span>×</span>${answerSlot(typed)}<span>＝</span><span>${q.product}</span>`;
+    }
+
+    document.getElementById("question").innerHTML = html;
+}
+
+function inputNumber(n) {
+    if (answered) return;
+    const maxLength = current && current.type === "hole" ? 1 : 2;
+    if (userAnswer.length >= maxLength) return;
+    if (userAnswer === "0") userAnswer = "";
+    userAnswer += String(n);
+    renderQuestion();
+}
+
+function deleteNumber() {
+    if (answered) return;
+    userAnswer = userAnswer.slice(0, -1);
+    renderQuestion();
+}
+
+function checkAnswer() {
+    if (answered) return;
+    const message = document.getElementById("message");
+
+    if (userAnswer === "") {
+        message.textContent = "数字を入れてね";
+        message.className = "message wrong";
+        return;
+    }
+
+    answered = true;
+    const value = Number(userAnswer);
+    if (value === current.answer) {
+        correctCount++;
+        message.textContent = "○ せいかい！";
+        message.className = "message correct";
+    } else {
+        message.textContent = `おしい！ 正解は ${current.answer}`;
+        message.className = "message wrong";
+    }
+
+    document.getElementById("answerButton").disabled = true;
+    const next = document.getElementById("nextButton");
+    next.textContent = currentQuestion === totalQuestions - 1 ? "結果を見る →" : "次の問題 →";
+    next.classList.remove("hidden");
+    document.getElementById("actionRow").classList.add("show-next");
+}
+
+function nextQuestion() {
+    if (!answered) return;
+    if (currentQuestion < totalQuestions - 1) {
+        currentQuestion++;
+        showQuestion();
+    } else {
+        finishGame();
+    }
+}
+
+function formatDate(date) {
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+function finishGame() {
+    endTime = performance.now();
+    const elapsedSeconds = (endTime - startTime) / 1000;
+    const averageSeconds = elapsedSeconds / totalQuestions;
+    const isPerfect = correctCount === totalQuestions;
+
+    document.getElementById("game").classList.add("hidden");
+    const result = document.getElementById("result");
+    result.classList.remove("hidden", "perfect");
+    if (isPerfect) result.classList.add("perfect");
+
+    document.getElementById("resultScore").textContent = `${totalQuestions}問中 ${correctCount}問正解`;
+
+    const celebration = document.getElementById("perfectCelebration");
+    if (isPerfect) {
+        document.getElementById("resultTitle").textContent = "🌟 パーフェクト！ 🌟";
+        celebration.textContent = "🎉🎊 ぜんぶせいかい！ 🎊🎉\n九九マスター！ よくできました！";
+        celebration.classList.remove("hidden");
+    } else {
+        document.getElementById("resultTitle").textContent = "🎉 おつかれさま！";
+        celebration.classList.add("hidden");
+    }
+
+    const stats = document.getElementById("resultStats");
+    let statsHtml = `<div class="result-date">${formatDate(new Date())}</div>`;
+    if (showTime) {
+        statsHtml += `<div class="result-time">総時間 ${elapsedSeconds.toFixed(2)}秒</div>`;
+        statsHtml += `<div class="result-average">平均 1問 ${averageSeconds.toFixed(2)}秒</div>`;
+    }
+    stats.innerHTML = statsHtml;
+
+    const ratio = correctCount / totalQuestions;
+    let message = "";
+    if (isPerfect) {
+        message = "その調子！ 次は別の練習にも挑戦してみよう。";
+    } else if (ratio >= 0.8) {
+        message = "あと少し！ 間違えた九九をもう一度確認してみよう。";
+    } else if (ratio >= 0.5) {
+        message = "よく取り組みました。段ごとの基本九九に戻って練習するのもおすすめです。";
+    } else {
+        message = "まずは1つの段を選んで，順番に確認してみよう。";
+    }
+    document.getElementById("resultMessage").textContent = message;
+}
+
+function confirmBackToSettings() {
+    const ok = window.confirm("問題の途中です。スタート画面に戻りますか？\nこの回の成績はリセットされます。");
+    if (ok) backToSettings();
+}
+
+function backToSettings() {
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("settings").classList.remove("hidden");
+    currentQuestion = 0;
+    correctCount = 0;
+    userAnswer = "";
+    answered = false;
+    questions = [];
+}
+
+document.addEventListener("keydown", event => {
+    if (document.getElementById("game").classList.contains("hidden")) return;
+
+    if (/^[0-9]$/.test(event.key)) {
+        inputNumber(Number(event.key));
+        event.preventDefault();
+    } else if (event.key === "Backspace" || event.key === "Delete") {
+        deleteNumber();
+        event.preventDefault();
+    } else if (event.key === "Enter") {
+        if (answered) nextQuestion();
+        else checkAnswer();
+        event.preventDefault();
+    }
+});
+</script>
+</body>
+</html>
